@@ -5,21 +5,10 @@
       "dest": "https://eduwork-mern-express-fgycwjjhv-mfazans23.vercel.app/api"
     }
   ],
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "s-maxage=86400"
-        }
-      ]
+      "src": "server.js",
+      "use": "@vercel/node"
     }
   ]
 }
