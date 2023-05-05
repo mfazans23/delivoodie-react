@@ -1,19 +1,22 @@
 {
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://your-api-url.com/$1"
-    }
-  ],
-  "headers": [
+      "dest": "https://eduwork-mern-express-fgycwjjhv-mfazans23.vercel.app/api/$1"
+    },
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/html"
-        }
-      ]
+      "src": "/(.*)",
+      "dest": "/build/$1"
     }
   ]
 }
