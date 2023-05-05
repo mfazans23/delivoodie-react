@@ -1,0 +1,25 @@
+{
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://eduwork-mern-express-fgycwjjhv-mfazans23.vercel.app/api"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=86400"
+        }
+      ]
+    }
+  ]
+}
