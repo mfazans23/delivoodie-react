@@ -2,13 +2,13 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://eduwork-mern-express-fgycwjjhv-mfazans23.vercel.app/api"
+      "dest": "https://your-api-url.com/$1"
     }
   ],
-  "builds": [
+  "rewrites": [
     {
-      "src": "server.js",
-      "use": "@vercel/node"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
