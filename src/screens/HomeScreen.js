@@ -9,8 +9,7 @@ import Loader from '../components/Loader'
 import Message from '../components/Message'
 import Paginate from '../components/Paginate'
 import { listProducts } from '../actions/productAction'
-import { addToCart, getCartDetails } from '../actions/cartAction'
-import { CART_ADD_ITEM_RESET } from '../constants/cartConstants'
+import { getCartDetails } from '../actions/cartAction'
 
 const HomeScreen = () => {
   const keyword = useParams().keyword || ''
@@ -18,27 +17,13 @@ const HomeScreen = () => {
 
   const dispatch = useDispatch()
 
-  // state to know which product 'add to cart' button is clicked
-  const [itemToCart, setItemToCart] = useState('')
-
   const { userInfo } = useSelector((state) => state.userLogin)
 
   const { loading, products, page, pages, error } = useSelector(
     (state) => state.productList
   )
 
-  const { loading: loadingAddItem, success } = useSelector(
-    (state) => state.cartAddItem
-  )
   const { cartItems } = useSelector((state) => state.cartDetails)
-
-  const addToCartHandler = (id, qty) => {
-    dispatch(addToCart(id, qty))
-  }
-
-  const isAddedToCart = (productId) => {
-    return cartItems?.some((item) => item.product === productId) || false
-  }
 
   useEffect(() => {
     if (userInfo) {
@@ -46,13 +31,6 @@ const HomeScreen = () => {
     }
     dispatch(listProducts(keyword, pageNumber))
   }, [])
-
-  useEffect(() => {
-    if (success) {
-      dispatch(getCartDetails())
-      dispatch({ type: CART_ADD_ITEM_RESET })
-    }
-  }, [success])
 
   return (
     <>
@@ -80,14 +58,7 @@ const HomeScreen = () => {
                 xl={3}
                 className='mb-4'
               >
-                <Product
-                  product={product}
-                  loading={loadingAddItem}
-                  addToCart={addToCartHandler}
-                  itemToCart={itemToCart}
-                  setItemToCart={setItemToCart}
-                  isAddedToCart={isAddedToCart}
-                />
+                <Product product={product} />
               </Col>
             ))}
           </Row>

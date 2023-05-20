@@ -1,18 +1,36 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { Card, Button, Spinner } from 'react-bootstrap'
 import Rating from './Rating'
 
+import { addToCart, getCartDetails } from '../actions/cartAction'
+import { CART_ADD_ITEM_RESET } from '../constants/cartConstants'
 import formatPrice from '../utils/formatPrice'
 
-const Product = ({
-  product,
-  loading,
-  addToCart,
-  itemToCart,
-  setItemToCart,
-  isAddedToCart,
-}) => {
+const Product = ({ product }) => {
+  const dispatch = useDispatch()
+
+  const { cartItems } = useSelector((state) => state.cartDetails)
+  const { loading: loadingAddItem, success: successAddItem } = useSelector(
+    (state) => state.cartAddItem
+  )
+
+  const [isClicked, setIsCliked] = useState(false)
+
+  const isAddedToCart = (productId) => {
+    return cartItems?.some((item) => item.product === productId)
+  }
+
+  useEffect(() => {
+    if (successAddItem) {
+      dispatch(getCartDetails())
+      dispatch({
+        type: CART_ADD_ITEM_RESET,
+      })
+      setIsCliked(false)
+    }
+  }, [successAddItem])
   return (
     <Card
       className='my-3 pb-3 overflow-hidden rounded'
@@ -48,8 +66,8 @@ const Product = ({
         <Button
           className='mt-auto rounded'
           onClick={() => {
-            setItemToCart(product._id)
-            addToCart(product._id, 1)
+            dispatch(addToCart(product._id, 1))
+            setIsCliked(true)
           }}
           disabled={isAddedToCart(product._id)}
         >
@@ -61,7 +79,7 @@ const Product = ({
           ) : (
             'Added'
           )}
-          {loading && product._id === itemToCart && (
+          {loadingAddItem && isClicked && (
             <Spinner animation='border' size='sm' className='ms-2' />
           )}
         </Button>
