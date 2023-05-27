@@ -9,6 +9,8 @@ import {
   productCreateReducer,
   productUpdateReducer,
   productDeleteReducer,
+  productCreateReviewReducer,
+  productDeleteReviewReducer,
 } from './reducers/productReducer'
 import {
   userRegisterReducer,
@@ -48,6 +50,8 @@ const reducer = combineReducers({
   productCreate: productCreateReducer,
   productUpdate: productUpdateReducer,
   productDelete: productDeleteReducer,
+  productCreateReview: productCreateReviewReducer,
+  productDeleteReview: productDeleteReviewReducer,
   cartDetails: cartDetailsReducer,
   cartAddItem: cartAddItemReducer,
   cartRemoveItem: cartRemoveItemReducer,

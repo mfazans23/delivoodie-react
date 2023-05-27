@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Card, Button, Spinner } from 'react-bootstrap'
 import Rating from './Rating'
 
@@ -10,7 +10,10 @@ import formatPrice from '../utils/formatPrice'
 
 const Product = ({ product }) => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const location = useLocation()
 
+  const { userInfo } = useSelector((state) => state.userLogin)
   const { cartItems } = useSelector((state) => state.cartDetails)
   const { loading: loadingAddItem, success: successAddItem } = useSelector(
     (state) => state.cartAddItem
@@ -24,13 +27,23 @@ const Product = ({ product }) => {
 
   useEffect(() => {
     if (successAddItem) {
+      setIsCliked(false)
       dispatch(getCartDetails())
       dispatch({
         type: CART_ADD_ITEM_RESET,
       })
-      setIsCliked(false)
     }
   }, [successAddItem])
+
+  useEffect(() => {
+    if (
+      location.state?.action === 'continueAddToCart' &&
+      location.state.productId === product._id
+    ) {
+      setIsCliked(true)
+      dispatch(addToCart(product._id, 1))
+    }
+  }, [location.state, dispatch])
   return (
     <Card
       className='my-3 pb-3 overflow-hidden rounded'
@@ -63,11 +76,18 @@ const Product = ({ product }) => {
         <Card.Text as='h3' className='text-transform-none py-0'>
           {formatPrice(product.price)}
         </Card.Text>
+
         <Button
           className='mt-auto rounded'
           onClick={() => {
-            dispatch(addToCart(product._id, 1))
-            setIsCliked(true)
+            if (userInfo) {
+              dispatch(addToCart(product._id, 1))
+              setIsCliked(true)
+            } else {
+              navigate('/login', {
+                state: { action: 'continueAddToCart', productId: product._id },
+              })
+            }
           }}
           disabled={isAddedToCart(product._id)}
         >

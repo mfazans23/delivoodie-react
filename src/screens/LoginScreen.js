@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  Link,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from 'react-router-dom'
 import { Form, Button, Row, Col } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import Message from '../components/Message'
@@ -10,6 +15,7 @@ import { login } from '../actions/userAction'
 const LoginScreen = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,9 +30,9 @@ const LoginScreen = () => {
 
   useEffect(() => {
     if (userInfo) {
-      if (redirect) navigate(`/${redirect}`)
+      if (redirect) navigate(`/${redirect}`, { state: location.state })
       else {
-        navigate('/')
+        navigate('/', { state: location.state })
       }
     }
   }, [navigate, userInfo, redirect])
