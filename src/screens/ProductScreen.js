@@ -242,7 +242,7 @@ const ProductScreen = () => {
                 )}
 
                 <ListGroup variant='flush'>
-                  {product.reviews.length > 0 ? (
+                  {product && product.reviews.length > 0 ? (
                     product.reviews.map((review) => (
                       <ListGroup.Item key={review._id}>
                         <Row>
