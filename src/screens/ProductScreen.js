@@ -57,7 +57,6 @@ const ProductScreen = () => {
 
   useEffect(() => {
     dispatch(listProductDetails(id))
-
     return () => {
       dispatch({ type: PRODUCT_DETAILS_REMOVE })
     }
@@ -115,7 +114,7 @@ const ProductScreen = () => {
 
   return (
     <>
-      {loading ? (
+      {loading && !product ? (
         <Loader />
       ) : (
         product && (
@@ -242,7 +241,7 @@ const ProductScreen = () => {
                     product.reviews.map((review) => (
                       <ListGroup.Item key={review._id}>
                         <Row>
-                          <Col md={review.user === userInfo._id && 10}>
+                          <Col md={review.user === userInfo?._id && 10}>
                             <div>{review.name}</div>
                             <Rating value={review.rating} />
                             <div className='pb-2'>
@@ -252,7 +251,7 @@ const ProductScreen = () => {
                             </div>
                             <p>{review.comment}</p>
                           </Col>
-                          {review.user === userInfo._id && (
+                          {review.user === userInfo?._id && (
                             <Col
                               md={2}
                               className='d-flex flex-column justify-content-start align-items-end gap-4 pt-4'
@@ -268,7 +267,7 @@ const ProductScreen = () => {
                                 style={{ cursor: 'pointer', color: '#1a1a1a' }}
                                 onClick={() => {
                                   const myReview = product.reviews.find(
-                                    (review) => review.user === userInfo._id
+                                    (review) => review.user === userInfo?._id
                                   )
 
                                   setRating(myReview.rating)
