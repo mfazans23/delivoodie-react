@@ -115,7 +115,7 @@ const ProductScreen = () => {
 
   return (
     <>
-      {loading && !product ? (
+      {loading ? (
         <Loader />
       ) : (
         product && (
@@ -238,7 +238,7 @@ const ProductScreen = () => {
                 )}
 
                 <ListGroup variant='flush'>
-                  {product && product.reviews.length > 0 ? (
+                  {product.reviews.length > 0 ? (
                     product.reviews.map((review) => (
                       <ListGroup.Item key={review._id}>
                         <Row>
