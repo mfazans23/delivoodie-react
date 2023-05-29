@@ -7,12 +7,19 @@ import moment from 'moment'
 import Rating from '../components/Rating'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
-import { createReview, listProductDetails } from '../actions/productAction'
+import {
+  listProductDetails,
+  createReview,
+  deleteReview,
+  updateReview,
+} from '../actions/productAction'
 import { addToCart } from '../actions/cartAction'
 import formatPrice from '../utils/formatPrice'
 import {
   PRODUCT_CREATE_REVIEW_RESET,
+  PRODUCT_DELETE_REVIEW_RESET,
   PRODUCT_DETAILS_REMOVE,
+  PRODUCT_UPDATE_REVIEW_RESET,
 } from '../constants/productConstants'
 import { CART_ADD_ITEM_RESET } from '../constants/cartConstants'
 
@@ -23,14 +30,28 @@ const ProductScreen = () => {
   const [qty, setQty] = useState(1)
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
+  const [updateReviewMode, setUpdateReviewMode] = useState(false)
 
   const { userInfo } = useSelector((state) => state.userLogin)
   const { loading, product, error } = useSelector(
     (state) => state.productDetails
   )
+  const {
+    loading: loadingCreateReview,
+    success: successCreateReview,
+    error: errorCreateReview,
+  } = useSelector((state) => state.productCreateReview)
+  const {
+    loading: loadingDeleteReview,
+    success: successDeleteReview,
+    error: errorDeleteReview,
+  } = useSelector((state) => state.productDeleteReview)
+  const {
+    loading: loadingUpdateReview,
+    success: successUpdateReview,
+    error: errorUpdateReview,
+  } = useSelector((state) => state.productUpdateReview)
   const { success } = useSelector((state) => state.cartAddItem)
-  const { loading: loadingCreateReview, success: successCreateReview } =
-    useSelector((state) => state.productCreateReview)
 
   const { id } = useParams()
 
@@ -54,11 +75,31 @@ const ProductScreen = () => {
   }, [success])
 
   useEffect(() => {
-    if (successCreateReview) {
+    if (successCreateReview || successDeleteReview || successUpdateReview) {
       dispatch(listProductDetails(id))
-      dispatch({ type: PRODUCT_CREATE_REVIEW_RESET })
+      setTimeout(() => {
+        successCreateReview
+          ? dispatch({ type: PRODUCT_CREATE_REVIEW_RESET })
+          : successDeleteReview
+          ? dispatch({ type: PRODUCT_DELETE_REVIEW_RESET })
+          : dispatch({ type: PRODUCT_UPDATE_REVIEW_RESET })
+      }, 2500)
+    } else if (errorCreateReview || errorDeleteReview || errorUpdateReview) {
+      setTimeout(() => {
+        errorCreateReview
+          ? dispatch({ type: PRODUCT_CREATE_REVIEW_RESET })
+          : errorDeleteReview
+          ? dispatch({ type: PRODUCT_DELETE_REVIEW_RESET })
+          : dispatch({ type: PRODUCT_UPDATE_REVIEW_RESET })
+      }, 2500)
     }
-  }, [successCreateReview])
+  }, [
+    successCreateReview,
+    successDeleteReview,
+    successUpdateReview,
+    errorCreateReview,
+    errorDeleteReview,
+  ])
 
   const addToCartHandler = () => {
     dispatch(addToCart(product._id, qty))
@@ -67,9 +108,12 @@ const ProductScreen = () => {
   const submitHandler = (e) => {
     e.preventDefault()
     if (rating && comment) {
-      dispatch(createReview(id, { rating, comment }))
+      !updateReviewMode
+        ? dispatch(createReview(id, { rating, comment }))
+        : dispatch(updateReview(id, { rating, comment }))
       setRating(0)
       setComment('')
+      setUpdateReviewMode(false)
     }
   }
 
@@ -174,17 +218,71 @@ const ProductScreen = () => {
             <Row>
               <Col md={6}>
                 <h3 className='mt-4'>Reviews</h3>
-                {(loading || loadingCreateReview) && <Loader />}
+                {(loading ||
+                  loadingCreateReview ||
+                  loadingDeleteReview ||
+                  loadingUpdateReview) && <Loader />}
+                {(successCreateReview ||
+                  successDeleteReview ||
+                  successUpdateReview) && (
+                  <Message>
+                    {`Your review has been ${
+                      successCreateReview
+                        ? 'created'
+                        : successDeleteReview
+                        ? 'deleted'
+                        : 'updated'
+                    } succesfully`}
+                  </Message>
+                )}
+                {(errorCreateReview || errorDeleteReview) && (
+                  <Message variant='danger'>
+                    {errorCreateReview || errorDeleteReview}
+                  </Message>
+                )}
+
                 <ListGroup variant='flush'>
                   {product.reviews.length > 0 ? (
                     product.reviews.map((review) => (
                       <ListGroup.Item key={review._id}>
-                        <div>{review.name}</div>
-                        <Rating value={review.rating} />
-                        <div className='pb-2'>
-                          {moment(review.updatedAt).format('YYYY-MM-DD HH:mm')}
-                        </div>
-                        <p>{review.comment}</p>
+                        <Row>
+                          <Col md={review.user === userInfo._id && 10}>
+                            <div>{review.name}</div>
+                            <Rating value={review.rating} />
+                            <div className='pb-2'>
+                              {moment(review.updatedAt).format(
+                                'YYYY-MM-DD HH:mm'
+                              )}
+                            </div>
+                            <p>{review.comment}</p>
+                          </Col>
+                          {review.user === userInfo._id && (
+                            <Col
+                              md={2}
+                              className='d-flex flex-column justify-content-start align-items-end gap-4 pt-4'
+                            >
+                              <i
+                                className='fa-solid fa-trash'
+                                style={{ cursor: 'pointer', color: '#1a1a1a' }}
+                                onClick={() => dispatch(deleteReview(id))}
+                              ></i>
+
+                              <i
+                                className='fa-solid fa-pen-to-square'
+                                style={{ cursor: 'pointer', color: '#1a1a1a' }}
+                                onClick={() => {
+                                  const myReview = product.reviews.find(
+                                    (review) => review.user === userInfo._id
+                                  )
+
+                                  setRating(myReview.rating)
+                                  setComment(myReview.comment)
+                                  setUpdateReviewMode(true)
+                                }}
+                              ></i>
+                            </Col>
+                          )}
+                        </Row>
                       </ListGroup.Item>
                     ))
                   ) : (
@@ -198,9 +296,6 @@ const ProductScreen = () => {
                         <Form.Select
                           value={rating}
                           onChange={(e) => setRating(Number(e.target.value))}
-                          disabled={product.reviews.find(
-                            (review) => review.user === userInfo._id
-                          )}
                           required
                         >
                           <option value=''>Select...</option>
@@ -215,20 +310,13 @@ const ProductScreen = () => {
                         <Form.Label>Comment</Form.Label>
                         <Form.Control
                           as='textarea'
+                          value={comment}
                           placeholder='write your review'
                           onChange={(e) => setComment(e.target.value)}
-                          disabled={product.reviews.find(
-                            (review) => review.user === userInfo._id
-                          )}
                           required
                         ></Form.Control>
                       </Form.Group>
-                      <Button
-                        type='submit'
-                        disabled={product.reviews.find(
-                          (review) => review.user === userInfo._id
-                        )}
-                      >
+                      <Button className='mt-2' type='submit'>
                         Submit
                       </Button>
                     </Form>
