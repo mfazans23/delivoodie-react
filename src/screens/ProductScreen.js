@@ -58,13 +58,9 @@ const ProductScreen = () => {
   useEffect(() => {
     dispatch(listProductDetails(id))
 
-    const removeProductDetails = () => {
-      dispatch({
-        type: PRODUCT_DETAILS_REMOVE,
-      })
+    return () => {
+      dispatch({ type: PRODUCT_DETAILS_REMOVE })
     }
-
-    return removeProductDetails
   }, [dispatch, id])
 
   useEffect(() => {
